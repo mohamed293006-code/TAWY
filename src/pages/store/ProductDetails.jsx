@@ -1,0 +1,129 @@
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { getProductById } from "../../services/productService.js";
+import { useCart } from "../../context/CartContext.jsx";
+
+function ProductDetails() {
+  const { id } = useParams();
+  const { addToCart } = useCart();
+
+  const [product, setProduct] = useState(null);
+  const [activeImage, setActiveImage] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    async function fetchProduct() {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await getProductById(id);
+        if (!data) {
+          setError("المنتج غير موجود.");
+        } else {
+          setProduct(data);
+          setActiveImage(data.images?.[0] || data.image || "");
+        }
+      } catch (err) {
+        console.error("ProductDetails: fetch error ->", err);
+        setError("حدث خطأ أثناء جلب بيانات المنتج.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProduct();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-12">
+        <p className="text-sm text-gray-500">جاري تحميل المنتج...</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <div className="max-w-5xl mx-auto px-4 py-12 flex flex-col items-center gap-4">
+        <p className="text-sm text-red-600">{error || "المنتج غير موجود."}</p>
+        <Link to="/" className="text-sm text-gray-700 underline">
+          الرجوع للمتجر
+        </Link>
+      </div>
+    );
+  }
+
+  const images = product.images?.length ? product.images : [product.image].filter(Boolean);
+
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-8">
+      <Link to="/" className="text-sm text-gray-500 hover:text-gray-900 mb-6 inline-block">
+        ← الرجوع للمتجر
+      </Link>
+
+      <div className="grid md:grid-cols-2 gap-10">
+        <div className="flex flex-col gap-3">
+          <div className="aspect-square w-full bg-gray-100 rounded-lg overflow-hidden">
+            {activeImage ? (
+              <img
+                src={activeImage}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
+                لا توجد صورة
+              </div>
+            )}
+          </div>
+
+          {images.length > 1 && (
+            <div className="grid grid-cols-5 gap-2">
+              {images.map((img, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveImage(img)}
+                  className={`aspect-square rounded-md overflow-hidden border-2 transition-colors ${
+                    activeImage === img ? "border-gray-900" : "border-transparent"
+                  }`}
+                >
+                  <img src={img} alt={`${product.name}-${i}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-4">
+          {product.category && (
+            <span className="text-xs text-gray-400 uppercase tracking-wide">
+              {product.category}
+            </span>
+          )}
+
+          <h1 className="text-2xl font-bold text-gray-900">{product.name}</h1>
+
+          <span className="text-xl font-semibold text-gray-900">
+            {product.price} ج.م
+          </span>
+
+          {product.description && (
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+              {product.description}
+            </p>
+          )}
+
+          <button
+            onClick={() => addToCart(product)}
+            className="mt-4 bg-gray-900 text-white text-sm py-3 rounded-md hover:bg-gray-700 transition-colors"
+          >
+            إضافة للسلة
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ProductDetails;

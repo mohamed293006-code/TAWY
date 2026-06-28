@@ -1,11 +1,21 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext.jsx";
 
 function ProductCard({ product }) {
   const { addToCart } = useCart();
 
+  function handleAddToCart(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+  }
+
   return (
-    <div className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+    <Link
+      to={`/product/${product.id}`}
+      className="flex flex-col bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+    >
       <div className="aspect-square w-full overflow-hidden bg-gray-100">
         <img
           src={product.image}
@@ -22,13 +32,13 @@ function ProductCard({ product }) {
           {product.price} ج.م
         </span>
         <button
-          onClick={() => addToCart(product)}
+          onClick={handleAddToCart}
           className="mt-2 w-full bg-gray-900 text-white text-sm py-2 rounded-md hover:bg-gray-700 transition-colors"
         >
           إضافة للسلة
         </button>
       </div>
-    </div>
+    </Link>
   );
 }
 

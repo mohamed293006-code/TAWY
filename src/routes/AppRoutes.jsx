@@ -1,6 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "../pages/store/Home.jsx";
+import ProductDetails from "../pages/store/ProductDetails.jsx";
 import Login from "../pages/auth/Login.jsx";
 import Checkout from "../pages/store/Checkout.jsx";
 import OrderSuccess from "../pages/store/OrderSuccess.jsx";
@@ -12,6 +13,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/product/:id" element={<ProductDetails />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/checkout"
