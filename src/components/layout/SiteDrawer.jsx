@@ -24,15 +24,17 @@ function SiteDrawer({ isOpen, onClose }) {
 
   return (
     <>
+      {/* الخلفية الشفافة - تم رفع الـ z-index لمنع تداخل الأزرار العائمة مثل الواتساب */}
       <div
-        className={`fixed inset-0 bg-black/40 z-50 transition-opacity ${
+        className={`fixed inset-0 bg-black/40 z-[9999] transition-opacity ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
       />
 
+      {/* القائمة الجانبية (Sidebar) - مع قيمة z-index عليا لحجب كل ما خلفها تماماً */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-80 bg-white z-50 shadow-xl transform transition-transform flex flex-col ${
+        className={`fixed top-0 right-0 h-full w-full sm:w-80 bg-white z-[9999] shadow-xl transform transition-transform flex flex-col ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -123,21 +125,22 @@ function SiteDrawer({ isOpen, onClose }) {
         </div>
       </div>
 
+      {/* نافذة تأكيد تسجيل الخروج المنبثقة - الـ z-index هنا أعلى من الـ Sidebar ليظهر فوقه بدقة */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center px-4">
-          <div className="bg-white rounded-lg max-w-sm w-full p-6 flex flex-col gap-4">
+        <div className="fixed inset-0 bg-black/50 z-[10000] flex items-center justify-center px-4">
+          <div className="bg-white rounded-lg max-w-sm w-full p-6 flex flex-col gap-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
             <h3 className="text-base font-semibold text-gray-900">تأكيد تسجيل الخروج</h3>
             <p className="text-sm text-gray-600">هل أنت متأكد أنك تريد تسجيل الخروج؟</p>
             <div className="flex gap-3 mt-2">
               <button
                 onClick={() => setShowLogoutConfirm(false)}
-                className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-md hover:bg-gray-50"
+                className="flex-1 border border-gray-300 text-gray-700 text-sm py-2 rounded-md hover:bg-gray-50 transition-colors"
               >
                 إلغاء
               </button>
               <button
                 onClick={handleConfirmLogout}
-                className="flex-1 bg-red-600 text-white text-sm py-2 rounded-md hover:bg-red-700"
+                className="flex-1 bg-red-600 text-white text-sm py-2 rounded-md hover:bg-red-700 transition-colors"
               >
                 تأكيد الخروج
               </button>
