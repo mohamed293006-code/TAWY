@@ -3,7 +3,7 @@ import { Truck, Headphones, ShieldCheck } from "lucide-react";
 import { getAllProducts } from "../../services/productService.js";
 import ProductCard from "../../components/product/ProductCard.jsx";
 import SearchBar from "../../components/search/SearchBar.jsx";
-import HeroCarousel from "../../components/store/HeroCarousel.jsx";
+import HeroCarousel from "./HeroCarousel.jsx";
 
 const MAX_HERO_SLIDES = 5;
 
