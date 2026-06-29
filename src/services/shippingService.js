@@ -1,6 +1,23 @@
-const FLAT_SHIPPING_COST = 50;
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig.js";
 
-export function getShippingCost(city) {
-  // مكان محجوز لربط أسعار شحن ديناميكية حسب المحافظة (city) في المرحلة القادمة
-  return FLAT_SHIPPING_COST;
+const shippingRatesRef = collection(db, "shippingRates");
+
+export async function getAvailableShippingRates() {
+  const snapshot = await getDocs(shippingRatesRef);
+
+  const rates = snapshot.docs.map((docSnap) => ({
+    id: docSnap.id,
+    ...docSnap.data(),
+  }));
+
+  return rates.filter((rate) => rate.available !== false);
+}
+
+export async function getAllShippingRates() {
+  const snapshot = await getDocs(shippingRatesRef);
+  return snapshot.docs.map((docSnap) => ({
+    id: docSnap.id,
+    ...docSnap.data(),
+  }));
 }

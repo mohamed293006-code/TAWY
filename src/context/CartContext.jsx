@@ -43,6 +43,8 @@ export function CartProvider({ children }) {
   });
 
   const [isCartLoading, setIsCartLoading] = useState(false);
+  const [shippingGovernorate, setShippingGovernorate] = useState("");
+  const [shippingCost, setShippingCost] = useState(0);
 
   useEffect(() => {
     try {
@@ -153,11 +155,22 @@ export function CartProvider({ children }) {
     }
   }
 
+  function setShipping(governorate, cost) {
+    setShippingGovernorate(governorate);
+    setShippingCost(Number(cost) || 0);
+  }
+
+  function clearShipping() {
+    setShippingGovernorate("");
+    setShippingCost(0);
+  }
+
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+  const grandTotal = totalPrice + shippingCost;
 
   const value = {
     cart,
@@ -168,6 +181,11 @@ export function CartProvider({ children }) {
     totalItems,
     totalPrice,
     isCartLoading,
+    shippingGovernorate,
+    shippingCost,
+    grandTotal,
+    setShipping,
+    clearShipping,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

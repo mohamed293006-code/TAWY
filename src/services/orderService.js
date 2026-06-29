@@ -39,7 +39,7 @@ async function getNextOrderNumber() {
   return nextNumber;
 }
 
-async function sendOrderEmail({ orderNumber, customer, totalPrice }) {
+async function sendOrderEmail({ orderNumber, customer, totalPrice, shippingCost, grandTotal }) {
   const recipientEmail = customer?.email?.trim();
 
   if (!recipientEmail) {
@@ -60,6 +60,8 @@ async function sendOrderEmail({ orderNumber, customer, totalPrice }) {
         customer_name: customer?.fullName || "—",
         customer_phone: customer?.phone || "—",
         total_price: totalPrice,
+        shipping_cost: shippingCost ?? 0,
+        grand_total: grandTotal ?? totalPrice,
       },
       EMAILJS_PUBLIC_KEY
     );
@@ -68,8 +70,16 @@ async function sendOrderEmail({ orderNumber, customer, totalPrice }) {
   }
 }
 
-export async function createOrder({ userId, customer, items, totalPrice }) {
+export async function createOrder({
+  userId,
+  customer,
+  items,
+  totalPrice,
+  shippingCost = 0,
+  grandTotal,
+}) {
   const orderNumber = await getNextOrderNumber();
+  const finalGrandTotal = grandTotal ?? totalPrice + shippingCost;
 
   const docRef = await addDoc(ordersRef, {
     orderNumber,
@@ -77,13 +87,21 @@ export async function createOrder({ userId, customer, items, totalPrice }) {
     customer,
     items,
     totalPrice,
+    shippingCost,
+    grandTotal: finalGrandTotal,
     paymentMethod: "cash_on_delivery",
     status: "pending",
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
 
-  await sendOrderEmail({ orderNumber, customer, totalPrice });
+  await sendOrderEmail({
+    orderNumber,
+    customer,
+    totalPrice,
+    shippingCost,
+    grandTotal: finalGrandTotal,
+  });
 
   return docRef.id;
 }

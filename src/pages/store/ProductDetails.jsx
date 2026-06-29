@@ -3,6 +3,8 @@ import { useParams, Link } from "react-router-dom";
 import { getProductById } from "../../services/productService.js";
 import { useCart } from "../../context/CartContext.jsx";
 
+const WHATSAPP_NUMBER = "201553533261";
+
 function ProductDetails() {
   const { id } = useParams();
   const { addToCart } = useCart();
@@ -34,6 +36,16 @@ function ProductDetails() {
 
     fetchProduct();
   }, [id]);
+
+  function handleOrderViaWhatsApp() {
+    if (!product) return;
+
+    const message = `أهلاً TAWY، أريد طلب منتج ${product.name} بسعر ${product.price} جنيه.
+رابط المنتج: ${window.location.href}`;
+
+    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, "_blank");
+  }
 
   if (loading) {
     return (
@@ -114,12 +126,21 @@ function ProductDetails() {
             </p>
           )}
 
-          <button
-            onClick={() => addToCart(product)}
-            className="mt-4 bg-gray-900 text-white text-sm py-3 rounded-md hover:bg-gray-700 transition-colors"
-          >
-            إضافة للسلة
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <button
+              onClick={() => addToCart(product)}
+              className="flex-1 bg-gray-900 text-white text-sm py-3 rounded-md hover:bg-gray-700 transition-colors"
+            >
+              إضافة للسلة
+            </button>
+
+            <button
+              onClick={handleOrderViaWhatsApp}
+              className="flex-1 bg-[#25D366] text-white text-sm py-3 rounded-md hover:bg-[#1ea952] transition-colors"
+            >
+              اطلب عبر الواتساب
+            </button>
+          </div>
         </div>
       </div>
     </div>

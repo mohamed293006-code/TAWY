@@ -1,12 +1,22 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { createOrder } from "../../services/orderService.js";
-import { getShippingCost } from "../../services/shippingService.js";
+import { getAvailableShippingRates } from "../../services/shippingService.js";
 
 function Checkout() {
-  const { cart, totalPrice, clearCart, isCartLoading } = useCart();
+  const {
+    cart,
+    totalPrice,
+    clearCart,
+    isCartLoading,
+    shippingGovernorate,
+    shippingCost,
+    grandTotal,
+    setShipping,
+    clearShipping,
+  } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -18,14 +28,35 @@ function Checkout() {
     city: "",
     notes: "",
   });
+  const [shippingRates, setShippingRates] = useState([]);
+  const [isLoadingRates, setIsLoadingRates] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const shippingCost = useMemo(() => getShippingCost(form.city), [form.city]);
-  const grandTotal = totalPrice + shippingCost;
+  useEffect(() => {
+    async function fetchRates() {
+      try {
+        const rates = await getAvailableShippingRates();
+        setShippingRates(rates);
+      } catch (err) {
+        console.error("Checkout: shipping rates fetch error ->", err);
+      } finally {
+        setIsLoadingRates(false);
+      }
+    }
+    fetchRates();
+  }, []);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
+  }
+
+  function handleGovernorateChange(e) {
+    const selectedName = e.target.value;
+    const rate = shippingRates.find((r) => r.governorate === selectedName);
+
+    setForm({ ...form, city: selectedName });
+    setShipping(selectedName, rate?.price || 0);
   }
 
   function isValidEmail(email) {
@@ -42,7 +73,7 @@ function Checkout() {
     }
 
     if (!form.fullName || !form.phone || !form.address || !form.city) {
-      setError("يرجى تعبئة جميع الحقول المطلوبة.");
+      setError("يرجى تعبئة جميع الحقول المطلوبة، بما فيها اختيار المحافظة.");
       return;
     }
 
@@ -58,9 +89,12 @@ function Checkout() {
         customer: form,
         items: cart,
         totalPrice,
+        shippingCost,
+        grandTotal,
       });
 
       clearCart();
+      clearShipping();
       navigate("/order-success", { state: { orderId } });
     } catch (err) {
       console.error("Order creation error:", err);
@@ -106,14 +140,23 @@ function Checkout() {
             placeholder="البريد الإلكتروني"
             className="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
           />
-          <input
-            type="text"
-            name="city"
+
+          <select
             value={form.city}
-            onChange={handleChange}
-            placeholder="المدينة / المحافظة"
-            className="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-          />
+            onChange={handleGovernorateChange}
+            disabled={isLoadingRates}
+            className="border border-gray-300 rounded-md px-4 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900 disabled:opacity-50"
+          >
+            <option value="">
+              {isLoadingRates ? "جاري تحميل المحافظات..." : "اختر المحافظة"}
+            </option>
+            {shippingRates.map((rate) => (
+              <option key={rate.id} value={rate.governorate}>
+                {rate.governorate} — {rate.price} ج.م
+              </option>
+            ))}
+          </select>
+
           <textarea
             name="address"
             value={form.address}
@@ -192,8 +235,12 @@ function Checkout() {
             <span>{totalPrice} ج.م</span>
           </div>
           <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>الشحن (تقديري)</span>
-            <span>{shippingCost} ج.م</span>
+            <span>
+              مصاريف الشحن{shippingGovernorate ? ` لـ ${shippingGovernorate}` : ""}
+            </span>
+            <span>
+              {shippingGovernorate ? `${shippingCost} ج.م` : "اختر المحافظة"}
+            </span>
           </div>
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
             <span className="text-sm font-semibold text-gray-900">الإجمالي</span>

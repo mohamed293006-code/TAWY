@@ -2,14 +2,18 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { X, Plus, Minus, Trash2 } from "lucide-react";
 import { useCart } from "../../context/CartContext.jsx";
-import { getShippingCost } from "../../services/shippingService.js";
 
 function CartDrawer({ isOpen, onClose }) {
-  const { cart, removeFromCart, updateQuantity, totalPrice } = useCart();
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    totalPrice,
+    shippingGovernorate,
+    shippingCost,
+    grandTotal,
+  } = useCart();
   const navigate = useNavigate();
-
-  const shippingCost = getShippingCost();
-  const grandTotal = totalPrice + shippingCost;
 
   function handleCheckout() {
     onClose();
@@ -41,7 +45,7 @@ function CartDrawer({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div className="flex flex-col h-[calc(100%-13rem)] overflow-y-auto px-4 py-4 gap-4">
+        <div className="flex flex-col h-[calc(100%-14rem)] overflow-y-auto px-4 py-4 gap-4">
           {cart.length === 0 ? (
             <p className="text-sm text-gray-500 text-center mt-10">
               السلة فارغة.
@@ -103,16 +107,23 @@ function CartDrawer({ isOpen, onClose }) {
             <span>سعر المنتجات</span>
             <span>{totalPrice} ج.م</span>
           </div>
+
           <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-            <span>الشحن (تقديري)</span>
-            <span>{shippingCost} ج.م</span>
+            <span>
+              مصاريف الشحن{shippingGovernorate ? ` لـ ${shippingGovernorate}` : ""}
+            </span>
+            <span>
+              {shippingGovernorate ? `${shippingCost} ج.م` : "يُحدد في صفحة الطلب"}
+            </span>
           </div>
+
           <div className="flex items-center justify-between mb-3 pt-2 border-t border-gray-100">
             <span className="text-sm font-medium text-gray-700">الإجمالي</span>
             <span className="text-base font-bold text-gray-900">
               {grandTotal} ج.م
             </span>
           </div>
+
           <button
             onClick={handleCheckout}
             disabled={cart.length === 0}
