@@ -9,6 +9,9 @@ import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
 import AddProductPage from "../pages/admin/AddProductPage.jsx";
 import ProductsManager from "../pages/admin/ProductsManager.jsx";
 import ShippingRatesManager from "../pages/admin/ShippingRatesManager.jsx";
+import AboutUs from "../pages/info/AboutUs.jsx";
+import PrivacyPolicy from "../pages/info/PrivacyPolicy.jsx";
+import ContactUs from "../pages/info/ContactUs.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 function AppRoutes() {
@@ -26,6 +29,10 @@ function AppRoutes() {
         }
       />
       <Route path="/order-success" element={<OrderSuccess />} />
+
+      <Route path="/about" element={<AboutUs />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/contact-us" element={<ContactUs />} />
 
       <Route
         path="/admin"

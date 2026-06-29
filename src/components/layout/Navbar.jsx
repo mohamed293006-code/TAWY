@@ -1,14 +1,16 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, LogIn, LogOut, User, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, LogIn, LogOut, User, LayoutDashboard, Menu } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useCart } from "../../context/CartContext.jsx";
 import CartDrawer from "../cart/CartDrawer.jsx";
+import SiteDrawer from "./SiteDrawer.jsx";
 
 function Navbar() {
   const { user, isAdmin, logout } = useAuth();
   const { totalItems } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSiteDrawerOpen, setIsSiteDrawerOpen] = useState(false);
 
   async function handleLogout() {
     try {
@@ -22,9 +24,19 @@ function Navbar() {
     <>
       <nav className="sticky top-0 z-40 bg-white border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="text-lg font-bold text-gray-900">
-            TAWY
-          </Link>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsSiteDrawerOpen(true)}
+              className="p-2 text-gray-700 hover:text-gray-900"
+              aria-label="القائمة"
+            >
+              <Menu size={22} />
+            </button>
+
+            <Link to="/" className="text-lg font-bold text-gray-900">
+              TAWY
+            </Link>
+          </div>
 
           <div className="flex items-center gap-4">
             {isAdmin && (
@@ -50,19 +62,19 @@ function Navbar() {
               )}
             </button>
 
-            {user?.uid ? (
+            {user ? (
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 text-sm text-gray-700">
-                  {user?.photoURL ? (
+                  {user.photoURL ? (
                     <img
                       src={user.photoURL}
-                      alt={user?.displayName || "User"}
+                      alt={user.displayName || "User"}
                       className="w-7 h-7 rounded-full"
                     />
                   ) : (
                     <User size={20} />
                   )}
-                  <span className="hidden sm:inline">{user?.displayName || ""}</span>
+                  <span className="hidden sm:inline">{user.displayName}</span>
                 </div>
                 <button
                   onClick={handleLogout}
@@ -86,6 +98,7 @@ function Navbar() {
       </nav>
 
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      <SiteDrawer isOpen={isSiteDrawerOpen} onClose={() => setIsSiteDrawerOpen(false)} />
     </>
   );
 }

@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Truck, Headphones, ShieldCheck } from "lucide-react";
 import { getAllProducts } from "../../services/productService.js";
 import ProductCard from "../../components/product/ProductCard.jsx";
 import SearchBar from "../../components/search/SearchBar.jsx";
-import HeroCarousel from "./HeroCarousel.jsx";
+import HeroCarousel from "../../components/store/HeroCarousel.jsx";
 
 const MAX_HERO_SLIDES = 5;
 
@@ -32,7 +33,9 @@ function Home() {
   }, []);
 
   const heroSlides = useMemo(() => {
-    const activeProducts = products.filter((p) => p.isActive !== false && (p.image || p.images?.length));
+    const activeProducts = products.filter(
+      (p) => p.isActive !== false && (p.image || p.images?.length)
+    );
     const featured = activeProducts.filter((p) => p.featured === true);
     const source = featured.length > 0 ? featured : activeProducts;
     return source.slice(0, MAX_HERO_SLIDES);
@@ -42,6 +45,18 @@ function Home() {
     const unique = new Set(products.map((p) => p.category).filter(Boolean));
     return Array.from(unique);
   }, [products]);
+
+  const categoryCards = useMemo(() => {
+    return categories.map((cat) => {
+      const representative = products.find(
+        (p) => p.category === cat && (p.image || p.images?.length)
+      );
+      return {
+        name: cat,
+        image: representative?.image || representative?.images?.[0] || "",
+      };
+    });
+  }, [categories, products]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -77,10 +92,56 @@ function Home() {
     return result;
   }, [products, searchTerm, selectedCategory, sortOrder, minPrice, maxPrice]);
 
+  function handleCategoryClick(categoryName) {
+    setSelectedCategory(categoryName);
+    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
+  }
+
   return (
     <div>
-      {!loading && heroSlides.length > 0 && (
-        <HeroCarousel slides={heroSlides} />
+      {!loading && heroSlides.length > 0 && <HeroCarousel slides={heroSlides} />}
+
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md px-4 py-3">
+            <Truck size={22} className="text-gray-700" />
+            <span className="text-sm text-gray-700">شحن سريع لجميع المحافظات</span>
+          </div>
+          <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md px-4 py-3">
+            <Headphones size={22} className="text-gray-700" />
+            <span className="text-sm text-gray-700">دعم فني 24/7</span>
+          </div>
+          <div className="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-md px-4 py-3">
+            <ShieldCheck size={22} className="text-gray-700" />
+            <span className="text-sm text-gray-700">جودة مضمونة</span>
+          </div>
+        </div>
+      </div>
+
+      {categoryCards.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <h2 className="text-base font-semibold text-gray-900 mb-3">تصفح الأقسام</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2">
+            {categoryCards.map((cat) => (
+              <button
+                key={cat.name}
+                onClick={() => handleCategoryClick(cat.name)}
+                className="flex flex-col items-center gap-2 flex-shrink-0"
+              >
+                <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border border-gray-200">
+                  {cat.image ? (
+                    <img src={cat.image} alt={cat.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                      {cat.name}
+                    </div>
+                  )}
+                </div>
+                <span className="text-xs text-gray-700">{cat.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
 
       <div id="products" className="max-w-6xl mx-auto px-4 py-8">

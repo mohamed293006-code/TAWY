@@ -4,48 +4,52 @@ import { Link } from "react-router-dom";
 const AUTOPLAY_INTERVAL = 4000;
 
 function HeroCarousel({ slides }) {
-  const containerRef = useRef(null);
+  const slideRefs = useRef([]);
   const autoplayRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const scrollToIndex = useCallback((index) => {
-    const container = containerRef.current;
-    if (!container) return;
-    const slideWidth = container.clientWidth;
-    container.scrollTo({ left: slideWidth * index, behavior: "smooth" });
-    setActiveIndex(index);
-  }, []);
+  useEffect(() => {
+    const target = slideRefs.current[activeIndex];
+    if (target) {
+      target.scrollIntoView({
+        behavior: "smooth",
+        inline: "start",
+        block: "nearest",
+      });
+    }
+  }, [activeIndex]);
 
   const goNext = useCallback(() => {
-    setActiveIndex((prev) => {
-      const next = (prev + 1) % slides.length;
-      scrollToIndex(next);
-      return next;
-    });
-  }, [slides.length, scrollToIndex]);
+    setActiveIndex((prev) => (prev + 1) % slides.length);
+  }, [slides.length]);
 
   const goPrev = useCallback(() => {
-    setActiveIndex((prev) => {
-      const next = (prev - 1 + slides.length) % slides.length;
-      scrollToIndex(next);
-      return next;
-    });
-  }, [slides.length, scrollToIndex]);
+    setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  }, [slides.length]);
+
+  function goToIndex(index) {
+    setActiveIndex(index);
+  }
 
   function startAutoplay() {
     if (slides.length <= 1) return;
-    clearInterval(autoplayRef.current);
-    autoplayRef.current = setInterval(goNext, AUTOPLAY_INTERVAL);
+    stopAutoplay();
+    autoplayRef.current = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % slides.length);
+    }, AUTOPLAY_INTERVAL);
   }
 
   function stopAutoplay() {
-    clearInterval(autoplayRef.current);
+    if (autoplayRef.current) {
+      clearInterval(autoplayRef.current);
+      autoplayRef.current = null;
+    }
   }
 
   useEffect(() => {
     startAutoplay();
-    return () => clearInterval(autoplayRef.current);
-  }, [goNext, slides.length]);
+    return () => stopAutoplay();
+  }, [slides.length]);
 
   if (!slides || slides.length === 0) return null;
 
@@ -55,12 +59,13 @@ function HeroCarousel({ slides }) {
       onMouseEnter={stopAutoplay}
       onMouseLeave={startAutoplay}
     >
-      <div
-        ref={containerRef}
-        className="carousel w-full rounded-none sm:rounded-lg overflow-hidden"
-      >
-        {slides.map((slide) => (
-          <div key={slide.id} className="carousel-item relative w-full">
+      <div className="carousel w-full rounded-none sm:rounded-lg overflow-hidden">
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            ref={(el) => (slideRefs.current[index] = el)}
+            className="carousel-item relative w-full"
+          >
             <Link
               to={`/product/${slide.id}`}
               className="relative block w-full h-[260px] sm:h-[380px] md:h-[440px]"
@@ -98,23 +103,23 @@ function HeroCarousel({ slides }) {
           <button
             onClick={goPrev}
             aria-label="السابق"
-            className="btn btn-circle absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 border-none hover:bg-white text-gray-900"
+            className="btn btn-circle absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 border-none hover:bg-white text-gray-900 z-10"
           >
             ❮
           </button>
           <button
             onClick={goNext}
             aria-label="التالي"
-            className="btn btn-circle absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 border-none hover:bg-white text-gray-900"
+            className="btn btn-circle absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 border-none hover:bg-white text-gray-900 z-10"
           >
             ❯
           </button>
 
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 z-10">
             {slides.map((_, index) => (
               <button
                 key={index}
-                onClick={() => scrollToIndex(index)}
+                onClick={() => goToIndex(index)}
                 aria-label={`الشريحة ${index + 1}`}
                 className={`w-2 h-2 rounded-full transition-colors ${
                   index === activeIndex ? "bg-white" : "bg-white/40"
