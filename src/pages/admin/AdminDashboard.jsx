@@ -11,6 +11,7 @@ function AdminDashboard() {
     { label: "الطلبات", path: "/admin" },
     { label: "المنتجات", path: "/admin/products" },
     { label: "إضافة منتج", path: "/admin/add-product" },
+    { label: "إدارة الشحن", path: "/admin/shipping" },
   ];
 
   return (
@@ -20,12 +21,12 @@ function AdminDashboard() {
         مرحباً {profile?.displayName || "أدمن"}
       </p>
 
-      <div className="flex items-center gap-2 border-b border-gray-200 mb-6">
+      <div className="flex items-center gap-2 border-b border-gray-200 mb-6 overflow-x-auto">
         {tabs.map((tab) => (
           <Link
             key={tab.path}
             to={tab.path}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-4 py-2 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
               location.pathname === tab.path
                 ? "border-gray-900 text-gray-900"
                 : "border-transparent text-gray-500 hover:text-gray-900"

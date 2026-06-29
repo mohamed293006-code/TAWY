@@ -8,6 +8,7 @@ import OrderSuccess from "../pages/store/OrderSuccess.jsx";
 import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
 import AddProductPage from "../pages/admin/AddProductPage.jsx";
 import ProductsManager from "../pages/admin/ProductsManager.jsx";
+import ShippingRatesManager from "../pages/admin/ShippingRatesManager.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 function AppRoutes() {
@@ -47,6 +48,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute adminOnly>
             <ProductsManager />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/shipping"
+        element={
+          <ProtectedRoute adminOnly>
+            <ShippingRatesManager />
           </ProtectedRoute>
         }
       />
