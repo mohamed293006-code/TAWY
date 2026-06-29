@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { getAllProducts } from "../../services/productService.js";
 import ProductCard from "../../components/product/ProductCard.jsx";
 import SearchBar from "../../components/search/SearchBar.jsx";
+import HeroCarousel from "../../components/store/HeroCarousel.jsx";
+
+const MAX_HERO_SLIDES = 5;
 
 function Home() {
   const [products, setProducts] = useState([]);
@@ -27,6 +30,13 @@ function Home() {
     }
     fetchProducts();
   }, []);
+
+  const heroSlides = useMemo(() => {
+    const activeProducts = products.filter((p) => p.isActive !== false && (p.image || p.images?.length));
+    const featured = activeProducts.filter((p) => p.featured === true);
+    const source = featured.length > 0 ? featured : activeProducts;
+    return source.slice(0, MAX_HERO_SLIDES);
+  }, [products]);
 
   const categories = useMemo(() => {
     const unique = new Set(products.map((p) => p.category).filter(Boolean));
@@ -67,28 +77,11 @@ function Home() {
     return result;
   }, [products, searchTerm, selectedCategory, sortOrder, minPrice, maxPrice]);
 
-  function scrollToProducts() {
-    document.getElementById("products")?.scrollIntoView({ behavior: "smooth" });
-  }
-
   return (
     <div>
-      <section className="bg-gray-50 border-b border-gray-200 py-16 px-4">
-        <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-4">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">
-            TAWY
-          </h1>
-          <p className="text-base sm:text-lg text-gray-600 max-w-xl">
-            تسوق أحدث المنتجات بجودة عالية وأسعار مناسبة، وتوصيل لباب بيتك.
-          </p>
-          <button
-            onClick={scrollToProducts}
-            className="mt-2 bg-gray-900 text-white text-sm px-6 py-2.5 rounded-md hover:bg-gray-700 transition-colors"
-          >
-            تسوق الآن
-          </button>
-        </div>
-      </section>
+      {!loading && heroSlides.length > 0 && (
+        <HeroCarousel slides={heroSlides} />
+      )}
 
       <div id="products" className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-6">
