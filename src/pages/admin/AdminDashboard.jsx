@@ -9,6 +9,7 @@ function AdminDashboard() {
 
   const tabs = [
     { label: "الطلبات", path: "/admin" },
+    { label: "المنتجات", path: "/admin/products" },
     { label: "إضافة منتج", path: "/admin/add-product" },
   ];
 

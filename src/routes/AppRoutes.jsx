@@ -7,6 +7,7 @@ import Checkout from "../pages/store/Checkout.jsx";
 import OrderSuccess from "../pages/store/OrderSuccess.jsx";
 import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
 import AddProductPage from "../pages/admin/AddProductPage.jsx";
+import ProductsManager from "../pages/admin/ProductsManager.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 
 function AppRoutes() {
@@ -38,6 +39,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute adminOnly>
             <AddProductPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/products"
+        element={
+          <ProtectedRoute adminOnly>
+            <ProductsManager />
           </ProtectedRoute>
         }
       />

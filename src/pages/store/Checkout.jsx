@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { createOrder } from "../../services/orderService.js";
+import { getShippingCost } from "../../services/shippingService.js";
 
 function Checkout() {
   const { cart, totalPrice, clearCart, isCartLoading } = useCart();
@@ -19,6 +20,9 @@ function Checkout() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+
+  const shippingCost = useMemo(() => getShippingCost(form.city), [form.city]);
+  const grandTotal = totalPrice + shippingCost;
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -107,7 +111,7 @@ function Checkout() {
             name="city"
             value={form.city}
             onChange={handleChange}
-            placeholder="المدينة"
+            placeholder="المدينة / المحافظة"
             className="border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
           />
           <textarea
@@ -182,13 +186,21 @@ function Checkout() {
           </div>
         )}
 
-        <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-200">
-          <span className="text-sm font-semibold text-gray-900">
-            الإجمالي
-          </span>
-          <span className="text-base font-bold text-gray-900">
-            {totalPrice} ج.م
-          </span>
+        <div className="mt-4 pt-4 border-t border-gray-200 flex flex-col gap-1">
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>سعر المنتجات</span>
+            <span>{totalPrice} ج.م</span>
+          </div>
+          <div className="flex items-center justify-between text-sm text-gray-600">
+            <span>الشحن (تقديري)</span>
+            <span>{shippingCost} ج.م</span>
+          </div>
+          <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+            <span className="text-sm font-semibold text-gray-900">الإجمالي</span>
+            <span className="text-base font-bold text-gray-900">
+              {grandTotal} ج.م
+            </span>
+          </div>
         </div>
       </div>
     </div>
