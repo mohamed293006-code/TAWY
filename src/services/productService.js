@@ -111,17 +111,55 @@ export async function addProductWithImages({ title, description, price, category
     files.map((file) => uploadImageToCloudinary(file))
   );
 
+  const mainImage = imageUrls[0] || "";
+
   const docRef = await addDoc(productsRef, {
     name: title,
     description: description || "",
     price: Number(price),
     category: category || "",
+    mainImage,
     images: imageUrls,
-    image: imageUrls[0] || "",
+    image: mainImage,
     isActive: true,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
 
   return docRef.id;
+}
+
+export async function updateProductWithImages(
+  productId,
+  { title, description, price, category },
+  newImageFiles = []
+) {
+  if (!title || price == null) {
+    throw new Error("اسم المنتج والسعر مطلوبان.");
+  }
+
+  const updatePayload = {
+    name: title,
+    description: description || "",
+    price: Number(price),
+    category: category || "",
+    updatedAt: serverTimestamp(),
+  };
+
+  if (newImageFiles.length > 0) {
+    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+      throw new Error("إعدادات Cloudinary غير مكتملة في ملف .env");
+    }
+
+    const imageUrls = await Promise.all(
+      newImageFiles.map((file) => uploadImageToCloudinary(file))
+    );
+
+    updatePayload.mainImage = imageUrls[0];
+    updatePayload.images = imageUrls;
+    updatePayload.image = imageUrls[0];
+  }
+
+  const ref_ = doc(db, "products", productId);
+  await updateDoc(ref_, updatePayload);
 }

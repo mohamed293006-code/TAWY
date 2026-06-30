@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { ArrowRight, Trash2, Pencil } from "lucide-react";
 import { getAllProducts, deleteProduct } from "../../services/productService.js";
+import EditProductForm from "./EditProductForm.jsx";
 
 function ProductsManager() {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ function ProductsManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState(null);
+  const [editingProduct, setEditingProduct] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -69,18 +71,27 @@ function ProductsManager() {
             >
               <div className="relative aspect-square w-full bg-gray-100">
                 <img
-                  src={product.image}
+                  src={product.mainImage || product.image}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
-                <button
-                  onClick={() => handleDelete(product.id)}
-                  disabled={deletingId === product.id}
-                  className="absolute top-2 right-2 bg-white/90 text-red-600 p-1.5 rounded-full hover:bg-red-50 disabled:opacity-50"
-                  aria-label="حذف المنتج"
-                >
-                  <Trash2 size={16} />
-                </button>
+                <div className="absolute top-2 right-2 flex gap-1.5">
+                  <button
+                    onClick={() => setEditingProduct(product)}
+                    className="bg-white/90 text-gray-700 p-1.5 rounded-full hover:bg-gray-50"
+                    aria-label="تعديل المنتج"
+                  >
+                    <Pencil size={16} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(product.id)}
+                    disabled={deletingId === product.id}
+                    className="bg-white/90 text-red-600 p-1.5 rounded-full hover:bg-red-50 disabled:opacity-50"
+                    aria-label="حذف المنتج"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
               <div className="p-3 flex flex-col gap-1">
                 <p className="text-sm font-medium text-gray-900 truncate">
@@ -91,6 +102,14 @@ function ProductsManager() {
             </div>
           ))}
         </div>
+      )}
+
+      {editingProduct && (
+        <EditProductForm
+          product={editingProduct}
+          onClose={() => setEditingProduct(null)}
+          onProductUpdated={fetchProducts}
+        />
       )}
     </div>
   );

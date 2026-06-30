@@ -11,6 +11,8 @@ function ProductCard({ product }) {
     addToCart(product);
   }
 
+  const displayImage = product.mainImage || product.image || product.images?.[0];
+
   return (
     <Link
       to={`/product/${product.id}`}
@@ -18,7 +20,7 @@ function ProductCard({ product }) {
     >
       <div className="aspect-square w-full overflow-hidden bg-gray-100">
         <img
-          src={product.image}
+          src={displayImage}
           alt={product.name}
           className="w-full h-full object-cover"
         />

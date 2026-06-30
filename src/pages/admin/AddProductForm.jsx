@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { ImagePlus, X } from "lucide-react";
 import { addProductWithImages } from "../../services/productService.js";
+import { STORE_CATEGORIES } from "../../constants/categories.js";
 
 function AddProductForm({ onProductAdded }) {
   const [form, setForm] = useState({
     title: "",
     description: "",
     price: "",
-    category: "",
+    category: STORE_CATEGORIES[0],
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [previews, setPreviews] = useState([]);
@@ -31,7 +32,7 @@ function AddProductForm({ onProductAdded }) {
   }
 
   function resetForm() {
-    setForm({ title: "", description: "", price: "", category: "" });
+    setForm({ title: "", description: "", price: "", category: STORE_CATEGORIES[0] });
     setImageFiles([]);
     setPreviews([]);
   }
@@ -125,19 +126,25 @@ function AddProductForm({ onProductAdded }) {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-medium text-gray-700">القسم</label>
-            <input
-              type="text"
+            <select
               name="category"
               value={form.category}
               onChange={handleChange}
-              placeholder="مثال: ملابس"
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-            />
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-gray-900"
+            >
+              {STORE_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-medium text-gray-700">صور المنتج</label>
+          <label className="text-sm font-medium text-gray-700">
+            صور المنتج <span className="text-xs text-gray-400">(أول صورة تُستخدم كصورة رئيسية في الكارت)</span>
+          </label>
 
           <label className="flex flex-col items-center justify-center gap-2 border border-dashed border-gray-300 rounded-md py-6 cursor-pointer hover:bg-gray-50 transition-colors">
             <ImagePlus size={22} className="text-gray-400" />
@@ -156,6 +163,11 @@ function AddProductForm({ onProductAdded }) {
               {previews.map((src, i) => (
                 <div key={i} className="relative aspect-square rounded-md overflow-hidden border border-gray-200">
                   <img src={src} alt={`preview-${i}`} className="w-full h-full object-cover" />
+                  {i === 0 && (
+                    <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[10px] text-center py-0.5">
+                      رئيسية
+                    </span>
+                  )}
                   <button
                     type="button"
                     onClick={() => removeImage(i)}

@@ -24,7 +24,7 @@ function ProductDetails() {
           setError("المنتج غير موجود.");
         } else {
           setProduct(data);
-          setActiveImage(data.images?.[0] || data.image || "");
+          setActiveImage(data.mainImage || data.images?.[0] || data.image || "");
         }
       } catch (err) {
         console.error("ProductDetails: fetch error ->", err);
@@ -66,7 +66,9 @@ function ProductDetails() {
     );
   }
 
-  const images = product.images?.length ? product.images : [product.image].filter(Boolean);
+  const images = product.images?.length
+    ? product.images
+    : [product.mainImage || product.image].filter(Boolean);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
@@ -91,12 +93,12 @@ function ProductDetails() {
           </div>
 
           {images.length > 1 && (
-            <div className="grid grid-cols-5 gap-2">
+            <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
               {images.map((img, i) => (
                 <button
                   key={i}
                   onClick={() => setActiveImage(img)}
-                  className={`aspect-square rounded-md overflow-hidden border-2 transition-colors ${
+                  className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 transition-colors ${
                     activeImage === img ? "border-gray-900" : "border-transparent"
                   }`}
                 >
@@ -120,13 +122,7 @@ function ProductDetails() {
             {product.price} ج.م
           </span>
 
-          {product.description && (
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-              {product.description}
-            </p>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => addToCart(product)}
               className="flex-1 bg-gray-900 text-white text-sm py-3 rounded-md hover:bg-gray-700 transition-colors"
@@ -140,6 +136,42 @@ function ProductDetails() {
             >
               اطلب عبر الواتساب
             </button>
+          </div>
+
+          <div className="flex flex-col gap-2 mt-4">
+            <div className="collapse collapse-arrow border border-gray-200 rounded-md bg-white">
+              <input type="checkbox" defaultChecked />
+              <div className="collapse-title text-sm font-medium text-gray-900">
+                تفاصيل المنتج
+              </div>
+              <div className="collapse-content text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                {product.description || "لا يوجد وصف مفصل لهذا المنتج حالياً."}
+              </div>
+            </div>
+
+            <div className="collapse collapse-arrow border border-gray-200 rounded-md bg-white">
+              <input type="checkbox" />
+              <div className="collapse-title text-sm font-medium text-gray-900">
+                معلومات الشحن
+              </div>
+              <div className="collapse-content text-sm text-gray-600 leading-relaxed">
+                يتم شحن طلبك خلال 2-5 أيام عمل حسب المحافظة، مع إمكانية الدفع
+                عند الاستلام. تختلف مصاريف الشحن حسب المحافظة وتظهر بوضوح أثناء
+                إتمام الطلب.
+              </div>
+            </div>
+
+            <div className="collapse collapse-arrow border border-gray-200 rounded-md bg-white">
+              <input type="checkbox" />
+              <div className="collapse-title text-sm font-medium text-gray-900">
+                سياسة الاسترجاع
+              </div>
+              <div className="collapse-content text-sm text-gray-600 leading-relaxed">
+                يمكنك استرجاع أو استبدال المنتج خلال 14 يوماً من تاريخ الاستلام،
+                بشرط أن يكون بحالته الأصلية وبدون استخدام. تواصل معنا عبر
+                واتساب لتفاصيل الاسترجاع.
+              </div>
+            </div>
           </div>
         </div>
       </div>

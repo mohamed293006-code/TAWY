@@ -3,7 +3,8 @@ import { Truck, Headphones, ShieldCheck } from "lucide-react";
 import { getAllProducts } from "../../services/productService.js";
 import ProductCard from "../../components/product/ProductCard.jsx";
 import SearchBar from "../../components/search/SearchBar.jsx";
-import HeroCarousel from "./HeroCarousel.jsx";
+import HeroCarousel from "../../components/store/HeroCarousel.jsx";
+import { STORE_CATEGORIES } from "../../constants/categories.js";
 
 const MAX_HERO_SLIDES = 5;
 
@@ -34,29 +35,27 @@ function Home() {
 
   const heroSlides = useMemo(() => {
     const activeProducts = products.filter(
-      (p) => p.isActive !== false && (p.image || p.images?.length)
+      (p) => p.isActive !== false && (p.mainImage || p.image || p.images?.length)
     );
     const featured = activeProducts.filter((p) => p.featured === true);
     const source = featured.length > 0 ? featured : activeProducts;
-    return source.slice(0, MAX_HERO_SLIDES);
-  }, [products]);
-
-  const categories = useMemo(() => {
-    const unique = new Set(products.map((p) => p.category).filter(Boolean));
-    return Array.from(unique);
+    return source.slice(0, MAX_HERO_SLIDES).map((p) => ({
+      ...p,
+      image: p.mainImage || p.image || p.images?.[0],
+    }));
   }, [products]);
 
   const categoryCards = useMemo(() => {
-    return categories.map((cat) => {
+    return STORE_CATEGORIES.map((cat) => {
       const representative = products.find(
-        (p) => p.category === cat && (p.image || p.images?.length)
+        (p) => p.category === cat && (p.mainImage || p.image || p.images?.length)
       );
       return {
         name: cat,
-        image: representative?.image || representative?.images?.[0] || "",
+        image: representative?.mainImage || representative?.image || representative?.images?.[0] || "",
       };
-    });
-  }, [categories, products]);
+    }).filter((cat) => products.some((p) => p.category === cat.name));
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
     let result = [...products];
@@ -121,7 +120,7 @@ function Home() {
       {categoryCards.length > 0 && (
         <div className="max-w-6xl mx-auto px-4 py-4">
           <h2 className="text-base font-semibold text-gray-900 mb-3">تصفح الأقسام</h2>
-          <div className="flex gap-4 overflow-x-auto pb-2">
+          <div className="flex gap-4 overflow-x-auto no-scrollbar pb-2">
             {categoryCards.map((cat) => (
               <button
                 key={cat.name}
@@ -156,7 +155,7 @@ function Home() {
             className="border border-gray-300 rounded-md px-3 py-2 text-sm bg-white"
           >
             <option value="all">كل الأقسام</option>
-            {categories.map((cat) => (
+            {STORE_CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>
                 {cat}
               </option>
